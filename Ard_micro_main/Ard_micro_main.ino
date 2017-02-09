@@ -16,7 +16,7 @@
 #define d7 = 
 
 //CAN variables
-#define CANspeed = 
+#define CANspeed = 1 //500k 
 tCAN message;
 
 //Monitoring Variables
@@ -27,8 +27,10 @@ uint8_t CLT = 0;
 
 void setup() {
   LiquidCrystal(re, enable, d4, d5, d6, d7);
+  setupScreen();
 
-  mcp2515_init(CANspeed)
+  mcp2515_init(CANspeed);
+  attachInterrupt(100, screenUpdate()); //Timer interrupt to update screen
 
 
 }
@@ -52,7 +54,11 @@ void loop() {
 
 }
 
-void screenOut() {
+void setupScreen() {
+  
+}
+
+void screenUpdate() {
   
 }
 
