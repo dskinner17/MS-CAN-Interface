@@ -1,4 +1,5 @@
 #include <LiquidCrystal.h>
+#include "TimerOne.h"
 #include "mcp2515.h"
 
 // AFR, MAP, IAT, water temp
@@ -25,19 +26,23 @@ uint8_t MAP = 0;
 uint8_t MAT = 0;
 uint8_t CLT = 0;
 
+//LCD
+LiquidCrystal lcd(re, enable, d4, d5, d6, d7);
+
 void setup() {
-  LiquidCrystal(re, enable, d4, d5, d6, d7);
   setupScreen();
 
   mcp2515_init(CANspeed);
-  attachInterrupt(100, screenUpdate()); //Timer interrupt to update screen
+
+  Timer1.initialize(1000000);
+  Timer1.attachInterrupt(updateLCD);
 
 
 }
 
 void loop() {
   if (mcp2515_check_message()) {
-  
+    noInterrupts();
     if (mcp2515_get_message(&message)) {
       if(message.id == 1512){
         MAP = (message.data[1]<<4) || message.data[0];
@@ -50,15 +55,36 @@ void loop() {
         AFR = message.data[1];
       }
     }
+    interrupts();
   }
 
 }
 
 void setupScreen() {
-  
+  lcd.begin(20, 4);
+  lcd.clear();
+  lcd.noCursor();
+  lcd.print("Hello, World!");
 }
 
-void screenUpdate() {
+void updateLCD() {
+  lcd.clear();
+  float fAFR, fMAP, fCLT, fMAT;
+
+  fAFR = AFR/10;
+  fMAP = fMAP/10;
+  fCLT = CLT/10;
+  fMAT = fMAT/10;
+
+  lcd.clear();
+  lcd.print("AFR: "); lcd.print(fAFR, 1);
+  lcd.setCursor(0,1);
+  lcd.print("MAP: "); lcd.print(fMAP, 1);
+  lcd.setCursor(0,2);
+  lcd.print("CLT: "); lcd.print(fCLT, 1);
+  lcd.setCursor(0,3);
+  lcd.print("IAT: "); lcd.print(fMAT, 1);
+  
   
 }
 
